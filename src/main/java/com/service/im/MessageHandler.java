@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 public class MessageHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageHandler.class);
-    private ProcessorManager manager;
+    private final ProcessorManager manager;
 
     public MessageHandler(ProcessorManager manager) {
         this.manager = manager;
@@ -25,8 +25,7 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof Protobuf.Body) {
-            Protobuf.Body body = (Protobuf.Body) msg;
+        if (msg instanceof Protobuf.Body body) {
             Session session = ctx.channel().attr(Session.KEY).get();
             MessageProcessor processor = manager.getMessageProcessor(session);
             if (processor != null) {
@@ -40,8 +39,7 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-        if (evt instanceof IdleStateEvent) {
-            IdleStateEvent event = (IdleStateEvent) evt;
+        if (evt instanceof IdleStateEvent event) {
             if (event.state() == IdleState.READER_IDLE) {
                 Channel channel = ctx.channel();
                 LOGGER.warn("{} 连接超时! 服务器关闭此连接!", channel.remoteAddress());
@@ -58,19 +56,19 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         Channel channel = ctx.channel();
+        LOGGER.info("有新连接注册:{} -> 当前在线人数{}个, 未登录连接数{}个", channel.remoteAddress().toString(), ChannelGroup.getOnlineSize(), ChannelGroup.getConnectedSize());
         Attribute<Session> attribute = channel.attr(Session.KEY);
         if (attribute.get() == null) {
             LOGGER.info("创建Session -> {}", channel.remoteAddress().toString());
             attribute.set(new Session(System.currentTimeMillis()));
         }
         ChannelGroup.connected(channel);
-        LOGGER.info("有新连接:{} -> 当前在线人数{}个, 未登录连接数{}个", channel.remoteAddress().toString(), ChannelGroup.getOnlineSize(), ChannelGroup.getConnectedSize());
-
     }
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         Channel channel = ctx.channel();
+        LOGGER.info("连接取消注册:{} -> 当前在线人数{}个, 未登录连接数{}个", channel.remoteAddress(), ChannelGroup.getOnlineSize(), ChannelGroup.getConnectedSize());
         Attribute<Session> attribute = channel.attr(Session.KEY);
         Session session = attribute.get();
         if (session != null) {
@@ -80,17 +78,17 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
         } else {
             ChannelGroup.disconnect(channel);
         }
-        LOGGER.info("连接断开:{} -> 当前在线人数{}个, 未登录连接数{}个", channel.remoteAddress(), ChannelGroup.getOnlineSize(), ChannelGroup.getConnectedSize());
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("channelRegistered -> channelActive -> channelInactive -> channelUnregistered");
+        LOGGER.info("连接准备就绪:{} -> 当前在线人数{}个, 未登录连接数{}个", ctx.channel().remoteAddress(), ChannelGroup.getOnlineSize(), ChannelGroup.getConnectedSize());
+
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("channelRegistered -> channelActive -> channelInactive -> channelUnregistered");
+        LOGGER.info("连接被关闭:{} -> 当前在线人数{}个, 未登录连接数{}个", ctx.channel().remoteAddress(), ChannelGroup.getOnlineSize(), ChannelGroup.getConnectedSize());
     }
 
 }

@@ -9,6 +9,8 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.protobuf.ProtobufDecoder;
 import io.netty.handler.codec.protobuf.ProtobufEncoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,10 +35,12 @@ public class TCPMessageServer {
             @Override
             protected void initChannel(SocketChannel ch) throws Exception {
                 ChannelPipeline pipeline = ch.pipeline();
-                pipeline.addLast("idle", new IdleStateHandler(READER_IDLE_TIME_SECONDS, 0, 0));
-                pipeline.addLast("decoder", new ProtobufDecoder(Protobuf.Body.getDefaultInstance()));
-                pipeline.addLast("handler", new MessageHandler(manager));
-                pipeline.addLast("encoder", new ProtobufEncoder());
+                pipeline.addLast(new IdleStateHandler(READER_IDLE_TIME_SECONDS, 0, 0));
+                pipeline.addLast(new ProtobufVarint32FrameDecoder());
+                pipeline.addLast(new ProtobufDecoder(Protobuf.Body.getDefaultInstance()));
+                pipeline.addLast(new MessageHandler(manager));
+                pipeline.addLast(new ProtobufEncoder());
+                pipeline.addLast(new ProtobufVarint32LengthFieldPrepender());
             }
         });
         try {

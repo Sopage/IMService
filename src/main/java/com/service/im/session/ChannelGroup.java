@@ -1,7 +1,9 @@
 package com.service.im.session;
 
 import io.netty.channel.Channel;
+import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.Attribute;
+import io.netty.util.concurrent.GlobalEventExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +15,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ChannelGroup {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ChannelGroup.class);
+
+    /**
+     * TODO 这个
+     */
+    public static final io.netty.channel.group.ChannelGroup CHANNEL_GROUP = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     /**
      * 存放已登录的Channel
