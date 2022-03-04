@@ -1,6 +1,7 @@
 package com.service.im.dao;
 
-import com.alibaba.druid.pool.DruidDataSourceFactory;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,7 +9,6 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Properties;
 
 public class DBConnect {
     private static final Logger LOGGER = LoggerFactory.getLogger(DBConnect.class);
@@ -16,9 +16,7 @@ public class DBConnect {
 
     public DBConnect() {
         try {
-            Properties properties = new Properties();
-            properties.load(getClass().getClassLoader().getResourceAsStream("druid.properties"));
-            dataSource = DruidDataSourceFactory.createDataSource(properties);
+            dataSource = new HikariDataSource(new HikariConfig());
         } catch (Exception e) {
             e.printStackTrace();
             LOGGER.error("数据库链接异常!!!", e);
@@ -32,7 +30,7 @@ public class DBConnect {
             ps.setObject(1, uid);
             ps.setObject(2, token);
             ResultSet rs = ps.executeQuery();
-            while (rs.next()){
+            while (rs.next()) {
                 uid = rs.getLong("id");
                 token = rs.getString("token");
                 LOGGER.info("uid={} token={}", uid, token);

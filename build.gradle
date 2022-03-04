@@ -1,23 +1,23 @@
-group 'com.service.im'
-version '1.0-SNAPSHOT'
-
-apply plugin: 'java'
-apply plugin: 'application'
-
-mainClassName = "com.service.im.TCPMessageServer"
+plugins {
+    id 'application'
+}
 
 repositories {
-    mavenLocal()
     mavenCentral()
-    jcenter()
+}
+
+application {
+    mainClass = 'com.service.im.TCPMessageServer'
 }
 
 dependencies {
-    compile "io.netty:netty-handler:4.1.22.Final"
-    compile "ch.qos.logback:logback-classic:1.2.3"
-    compile "redis.clients:jedis:2.9.0"
-    compile "mysql:mysql-connector-java:6.0.6"
-    compile "com.alibaba:druid:1.1.8"
-    compile "com.alibaba:fastjson:1.2.46"
-    testCompile "junit:junit:4.12"
+    implementation 'io.netty:netty-all:4.1.74.Final'
+    implementation 'io.lettuce:lettuce-core:6.1.6.RELEASE'
+    implementation 'com.zaxxer:HikariCP:5.0.1'
+    implementation 'ch.qos.logback:logback-classic:1.2.10'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
 }
