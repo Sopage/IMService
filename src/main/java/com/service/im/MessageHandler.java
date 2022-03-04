@@ -2,7 +2,7 @@ package com.service.im;
 
 import com.service.im.processor.MessageProcessor;
 import com.service.im.processor.ProcessorManager;
-import com.service.im.protocol.Body;
+import com.service.im.protobuf.Protobuf;
 import com.service.im.session.ChannelGroup;
 import com.service.im.session.Session;
 import io.netty.channel.Channel;
@@ -25,14 +25,15 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof Body) {
-            Body body = (Body) msg;
-            MessageProcessor processor = manager.getMessageProcessor(body.getSession());
+        if (msg instanceof Protobuf.Body) {
+            Protobuf.Body body = (Protobuf.Body) msg;
+            Session session = ctx.channel().attr(Session.KEY).get();
+            MessageProcessor processor = manager.getMessageProcessor(session);
             if (processor != null) {
                 LOGGER.debug("分配消息给 [{}]", processor.getName());
                 processor.add(body);
             } else {
-                LOGGER.error("无法给 {} 分配消息处理器，消息丢失！", body.getChannel().remoteAddress().toString());
+                LOGGER.error("无法给 {} 分配消息处理器，消息丢失！", ctx.channel().remoteAddress().toString());
             }
         }
     }
@@ -82,14 +83,14 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
         LOGGER.info("连接断开:{} -> 当前在线人数{}个, 未登录连接数{}个", channel.remoteAddress(), ChannelGroup.getOnlineSize(), ChannelGroup.getConnectedSize());
     }
 
-//    @Override
-//    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-//        System.out.println("channelRegistered -> channelActive -> channelInactive -> channelUnregistered");
-//    }
-//
-//    @Override
-//    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-//        System.out.println("channelRegistered -> channelActive -> channelInactive -> channelUnregistered");
-//    }
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("channelRegistered -> channelActive -> channelInactive -> channelUnregistered");
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("channelRegistered -> channelActive -> channelInactive -> channelUnregistered");
+    }
 
 }

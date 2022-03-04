@@ -1,12 +1,14 @@
 package com.service.im;
 
 import com.service.im.processor.ProcessorManager;
-import com.service.im.redis.Redis;
+import com.service.im.protobuf.Protobuf;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.protobuf.ProtobufDecoder;
+import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +20,6 @@ public class TCPMessageServer {
     private static final int PORT = 6969;
 
     public static void main(String[] args) {
-//        Redis.doInit();
         final ProcessorManager manager = new ProcessorManager();
         EventLoopGroup bossLoopGroup = new NioEventLoopGroup();
         EventLoopGroup workLoopGroup = new NioEventLoopGroup();
@@ -32,10 +33,10 @@ public class TCPMessageServer {
             @Override
             protected void initChannel(SocketChannel ch) throws Exception {
                 ChannelPipeline pipeline = ch.pipeline();
-//                pipeline.addLast("idle", new IdleStateHandler(READER_IDLE_TIME_SECONDS, 0, 0));
-                pipeline.addLast("decoder", new MessageDecoder());
+                pipeline.addLast("idle", new IdleStateHandler(READER_IDLE_TIME_SECONDS, 0, 0));
+                pipeline.addLast("decoder", new ProtobufDecoder(Protobuf.Body.getDefaultInstance()));
                 pipeline.addLast("handler", new MessageHandler(manager));
-                pipeline.addLast("encoder", new MessageEncoder());
+                pipeline.addLast("encoder", new ProtobufEncoder());
             }
         });
         try {

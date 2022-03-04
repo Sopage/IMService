@@ -1,5 +1,5 @@
 syntax = "proto3";
-//option java_package = "com.service.im.protobuf";
+option java_package = "com.service.im.protobuf";
 //option java_outer_classname = "Protobuf";
 
 message Body {

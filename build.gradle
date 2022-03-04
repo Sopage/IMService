@@ -1,5 +1,6 @@
 plugins {
     id 'application'
+    id 'com.google.protobuf' version "0.8.18"
 }
 
 repositories {
@@ -10,11 +11,19 @@ application {
     mainClass = 'com.service.im.TCPMessageServer'
 }
 
+protobuf {
+    generatedFilesBaseDir = "$projectDir/src/"
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.19.4'
+    }
+}
+
 dependencies {
     implementation 'io.netty:netty-all:4.1.74.Final'
     implementation 'io.lettuce:lettuce-core:6.1.6.RELEASE'
     implementation 'com.zaxxer:HikariCP:5.0.1'
     implementation 'ch.qos.logback:logback-classic:1.2.10'
+    implementation 'com.google.protobuf:protobuf-java:3.19.4'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
 }
 

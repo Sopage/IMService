@@ -1,6 +1,6 @@
 package com.service.im.processor;
 
-import com.service.im.protocol.Body;
+import com.service.im.protobuf.Protobuf.Body;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
